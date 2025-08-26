@@ -28,7 +28,7 @@ python filenameconv.py <directory> [options]
 ## Example
 
 ```bash
-python filenameconv.py ./files --pattern "{index}_{original}"
+python filenameconv.py directory --pattern "{index}_{original}"
 ```
 
 ## License
