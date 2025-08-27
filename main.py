@@ -1,9 +1,137 @@
 # このスクリプトは、ファイル名を一括処理するためのものです。
 # main.py
-
 import os
 import sys
 import glob
+
+from PyQt6 import QtCore, QtGui
+
+from PyQt6.QtWidgets import (QApplication, QWidget,
+                             QMainWindow, QLabel,
+                             QLineEdit, QPushButton,
+                             QHBoxLayout, QVBoxLayout,
+                             QCheckBox, QFrame,
+                             QSpacerItem, QSizePolicy,
+                             QTextEdit, QProgressBar,
+                             QFileDialog, QMessageBox)
+from PyQt6.QtGui import QIcon, QAction
+
+
+class MainWindow(QMainWindow):
+    dir_path = ""
+    file_names = []
+    step = 0
+
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+    
+    def initUI(self):
+        # ウィンドウの設定
+        self.setWindowTitle("File Name Converter")
+        self.setFixedSize(600,400)
+        # self.setGeometry(100, 100, 600, 400)
+        self.centralWidget = QWidget(parent=self)
+        self.centralWidget.setObjectName("centralWidget")
+        self.verticalLayoutWidget = QWidget(parent=self.centralWidget)
+        self.verticalLayoutWidget.setGeometry(QtCore.QRect(10, 10, 580, 380))
+        self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
+        self.verticalLayout = QVBoxLayout(self.verticalLayoutWidget)
+        self.verticalLayout.setContentsMargins(0, 0, 0, 10)
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.label_path = QLabel(parent=self.verticalLayoutWidget)
+        self.label_path.setObjectName("label_path")
+        self.verticalLayout.addWidget(self.label_path)
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.lineEdit_path = QLineEdit(parent=self.verticalLayoutWidget)
+        self.lineEdit_path.setObjectName("lineEdit_path")
+        self.horizontalLayout_2.addWidget(self.lineEdit_path)
+        self.pushButton_select_path = QPushButton(parent=self.verticalLayoutWidget)
+        self.pushButton_select_path.setObjectName("pushButton_select_path")
+        self.pushButton_select_path.setText("参照...")
+        self.pushButton_select_path.clicked.connect(self.open_folder_dialog)
+        self.horizontalLayout_2.addWidget(self.pushButton_select_path)
+        self.verticalLayout.addLayout(self.horizontalLayout_2)
+        self.label_log = QLabel(parent=self.verticalLayoutWidget)
+        self.label_log.setObjectName("label_log")
+        self.label_log.setText("情報")
+        self.verticalLayout.addWidget(self.label_log)
+        self.textEdit_log = QTextEdit(parent=self.verticalLayoutWidget)
+        self.textEdit_log.setObjectName("textEdit_log")
+        self.verticalLayout.addWidget(self.textEdit_log)
+        self.line = QFrame(parent=self.verticalLayoutWidget)
+        self.line.setFrameShape(QFrame.Shape.HLine)
+        self.line.setFrameShadow(QFrame.Shadow.Sunken)
+        self.line.setObjectName("line")
+        self.verticalLayout.addWidget(self.line)
+        self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.checkBox_removeHeaderCharactor = QCheckBox(parent=self.verticalLayoutWidget)
+        self.checkBox_removeHeaderCharactor.setObjectName("checkBox_removeHeaderCharactor")
+        self.checkBox_removeHeaderCharactor.setText("先頭の文字を")
+        self.horizontalLayout.addWidget(self.checkBox_removeHeaderCharactor)
+        self.lineEdit_removeNumber = QLineEdit(parent=self.verticalLayoutWidget)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.lineEdit_removeNumber.sizePolicy().hasHeightForWidth())
+        self.lineEdit_removeNumber.setSizePolicy(sizePolicy)
+        self.lineEdit_removeNumber.setObjectName("lineEdit_removeNumber")
+        self.lineEdit_removeNumber.setText("3")
+        self.horizontalLayout.addWidget(self.lineEdit_removeNumber)
+        self.label_2 = QLabel(parent=self.verticalLayoutWidget)
+        self.label_2.setObjectName("label_2")
+        self.label_2.setText("文字を取り除く。")
+        self.horizontalLayout.addWidget(self.label_2)
+        spacerItem = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.horizontalLayout.addItem(spacerItem)
+        self.verticalLayout.addLayout(self.horizontalLayout)
+        self.line_2 = QFrame(parent=self.verticalLayoutWidget)
+        self.line_2.setFrameShape(QFrame.Shape.HLine)
+        self.line_2.setFrameShadow(QFrame.Shadow.Sunken)
+        self.line_2.setObjectName("line_2")
+        self.verticalLayout.addWidget(self.line_2)
+        self.horizontalLayout_3 = QHBoxLayout()
+        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
+        spacerItem = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.horizontalLayout_3.addItem(spacerItem)
+        self.btn_run = QPushButton(parent=self.verticalLayoutWidget)
+        self.btn_run.setObjectName("btn_run")
+        self.btn_run.setText("実行")
+        self.horizontalLayout_3.addWidget(self.btn_run)
+        self.btn_quit = QPushButton(parent=self.verticalLayoutWidget)
+        self.btn_quit.setObjectName("btn_quit")
+        self.btn_quit.setText("終了")
+        self.btn_quit.clicked.connect(self.close)
+        self.horizontalLayout_3.addWidget(self.btn_quit)
+        self.verticalLayout.addLayout(self.horizontalLayout_3)
+        self.setCentralWidget(self.centralWidget)
+        self.menubar = self.menuBar()
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 22))
+        self.menubar.setObjectName("menubar")
+        self.statusbar = self.statusBar()
+        self.statusbar.setObjectName("statusbar")
+        self.statusbar.showMessage("Ready")
+        self.label_path.setText("参照パス")
+        
+        
+
+        self.show()
+    
+    def open_folder_dialog(self):
+        folder = QFileDialog.getExistingDirectory(self, "フォルダを選択")
+        if folder:
+            self.lineEdit_path.setText(folder)
+            self.dir_path = folder
+            self.file_names = get_file_names(folder)
+            if self.file_names:
+                for file in self.file_names:
+                    self.textEdit_log.append(file)
+
+
+
+
 
 def get_file_names(directory):
     """
@@ -94,7 +222,7 @@ def edit_file_names(files, prefix=""):
     return edited_files
     
 
-def main():
+def main2():
     # コマンドライン引数からディレクトリを取得
     if len(sys.argv) < 2:
         print("Usage: python main.py <directory>")
@@ -116,5 +244,11 @@ def main():
     for file in edit_files:
         print(file)
 
+
+def main(args):
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    sys.exit(app.exec())
+
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
