@@ -3,6 +3,7 @@
 import os
 import sys
 import glob
+import shutil
 
 from PyQt6 import QtCore, QtGui
 
@@ -30,47 +31,60 @@ class MainWindow(QMainWindow):
         # ウィンドウの設定
         self.setWindowTitle("File Name Converter")
         self.setFixedSize(600,400)
-        # self.setGeometry(100, 100, 600, 400)
+
         self.centralWidget = QWidget(parent=self)
         self.centralWidget.setObjectName("centralWidget")
+        
         self.verticalLayoutWidget = QWidget(parent=self.centralWidget)
         self.verticalLayoutWidget.setGeometry(QtCore.QRect(10, 10, 580, 380))
         self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
+        
         self.verticalLayout = QVBoxLayout(self.verticalLayoutWidget)
         self.verticalLayout.setContentsMargins(0, 0, 0, 10)
         self.verticalLayout.setObjectName("verticalLayout")
+        
         self.label_path = QLabel(parent=self.verticalLayoutWidget)
         self.label_path.setObjectName("label_path")
         self.verticalLayout.addWidget(self.label_path)
+        
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        
         self.lineEdit_path = QLineEdit(parent=self.verticalLayoutWidget)
         self.lineEdit_path.setObjectName("lineEdit_path")
         self.horizontalLayout_2.addWidget(self.lineEdit_path)
+        
         self.pushButton_select_path = QPushButton(parent=self.verticalLayoutWidget)
         self.pushButton_select_path.setObjectName("pushButton_select_path")
         self.pushButton_select_path.setText("参照...")
         self.pushButton_select_path.clicked.connect(self.open_folder_dialog)
         self.horizontalLayout_2.addWidget(self.pushButton_select_path)
+        
         self.verticalLayout.addLayout(self.horizontalLayout_2)
+        
         self.label_log = QLabel(parent=self.verticalLayoutWidget)
         self.label_log.setObjectName("label_log")
         self.label_log.setText("情報")
         self.verticalLayout.addWidget(self.label_log)
+        
         self.textEdit_log = QTextEdit(parent=self.verticalLayoutWidget)
         self.textEdit_log.setObjectName("textEdit_log")
         self.verticalLayout.addWidget(self.textEdit_log)
+        
         self.line = QFrame(parent=self.verticalLayoutWidget)
         self.line.setFrameShape(QFrame.Shape.HLine)
         self.line.setFrameShadow(QFrame.Shadow.Sunken)
         self.line.setObjectName("line")
         self.verticalLayout.addWidget(self.line)
+        
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
+        
         self.checkBox_removeHeaderCharactor = QCheckBox(parent=self.verticalLayoutWidget)
         self.checkBox_removeHeaderCharactor.setObjectName("checkBox_removeHeaderCharactor")
-        self.checkBox_removeHeaderCharactor.setText("先頭の文字を")
+        self.checkBox_removeHeaderCharactor.setText("先頭の")
         self.horizontalLayout.addWidget(self.checkBox_removeHeaderCharactor)
+        
         self.lineEdit_removeNumber = QLineEdit(parent=self.verticalLayoutWidget)
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -80,43 +94,55 @@ class MainWindow(QMainWindow):
         self.lineEdit_removeNumber.setObjectName("lineEdit_removeNumber")
         self.lineEdit_removeNumber.setText("3")
         self.horizontalLayout.addWidget(self.lineEdit_removeNumber)
+        
         self.label_2 = QLabel(parent=self.verticalLayoutWidget)
         self.label_2.setObjectName("label_2")
         self.label_2.setText("文字を取り除く。")
         self.horizontalLayout.addWidget(self.label_2)
+        
         spacerItem = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
+        
         self.verticalLayout.addLayout(self.horizontalLayout)
+        
         self.line_2 = QFrame(parent=self.verticalLayoutWidget)
         self.line_2.setFrameShape(QFrame.Shape.HLine)
         self.line_2.setFrameShadow(QFrame.Shadow.Sunken)
         self.line_2.setObjectName("line_2")
+        
         self.verticalLayout.addWidget(self.line_2)
+        
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
+        
         spacerItem = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         self.horizontalLayout_3.addItem(spacerItem)
+        
         self.btn_run = QPushButton(parent=self.verticalLayoutWidget)
         self.btn_run.setObjectName("btn_run")
         self.btn_run.setText("実行")
+        self.btn_run.clicked.connect(self.remove_prefix)
         self.horizontalLayout_3.addWidget(self.btn_run)
+
         self.btn_quit = QPushButton(parent=self.verticalLayoutWidget)
         self.btn_quit.setObjectName("btn_quit")
         self.btn_quit.setText("終了")
         self.btn_quit.clicked.connect(self.close)
         self.horizontalLayout_3.addWidget(self.btn_quit)
+
         self.verticalLayout.addLayout(self.horizontalLayout_3)
+        
         self.setCentralWidget(self.centralWidget)
+        
         self.menubar = self.menuBar()
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 22))
         self.menubar.setObjectName("menubar")
+        
         self.statusbar = self.statusBar()
         self.statusbar.setObjectName("statusbar")
         self.statusbar.showMessage("Ready")
         self.label_path.setText("参照パス")
         
-        
-
         self.show()
     
     def open_folder_dialog(self):
@@ -128,9 +154,36 @@ class MainWindow(QMainWindow):
             if self.file_names:
                 for file in self.file_names:
                     self.textEdit_log.append(file)
-
-
-
+        
+    def remove_prefix(self):
+        if self.checkBox_removeHeaderCharactor.isChecked():
+            try:
+                num = int(self.lineEdit_removeNumber.text())
+                if num < 0:
+                    raise ValueError
+                self.step = num
+                self.textEdit_log.append(f"先頭の{num}文字を取り除きます。{self.file_names}")
+                out_dir = os.path.join(self.dir_path, "output")
+                os.makedirs(out_dir, exist_ok=True)
+                self.statusBar().showMessage("処理中...")
+                for i, file in enumerate(self.file_names):
+                    src = os.path.join(self.dir_path, file)
+                    new_name = remove_prefix(file, prefix=file[:num])
+                    dst = os.path.join(out_dir, new_name)
+                    shutil.copy(src, dst)
+                    self.textEdit_log.append(f"Renamed: {file} -> {new_name}")
+                self.textEdit_log.append(f"処理が完了しました。")
+                self.textEdit_log.append(f"処理したファイル数: {len(self.file_names)}")
+                self.textEdit_log.append(f"出力フォルダ: {out_dir}")
+                self.textEdit_log.append(f"----------------------------------------")
+                self.statusbar.showMessage("Ready")
+            except ValueError:
+                QMessageBox.warning(self, "警告", "正の整数を入力してください。")
+                self.checkBox_removeHeaderCharactor.setChecked(False)
+                self.lineEdit_removeNumber.setText("3")
+                self.step = 0
+        else:
+                self.step = 0
 
 
 def get_file_names(directory):
