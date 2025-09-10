@@ -5,7 +5,7 @@ import sys
 import glob
 import shutil
 
-from PyQt6 import QtCore, QtGui
+from PyQt6 import QtCore
 
 from PyQt6.QtWidgets import (QApplication, QWidget,
                              QMainWindow, QLabel,
@@ -13,10 +13,10 @@ from PyQt6.QtWidgets import (QApplication, QWidget,
                              QHBoxLayout, QVBoxLayout,
                              QCheckBox, QFrame,
                              QSpacerItem, QSizePolicy,
-                             QTextEdit, QProgressBar,
+                             QTextEdit,
                              QFileDialog, QMessageBox,
                              QComboBox)
-from PyQt6.QtGui import QIcon, QAction
+from PyQt6.QtGui import QIcon
 
 
 class MainWindow(QMainWindow):
