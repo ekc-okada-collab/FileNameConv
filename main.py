@@ -14,12 +14,14 @@ from PyQt6.QtWidgets import (QApplication, QWidget,
                              QCheckBox, QFrame,
                              QSpacerItem, QSizePolicy,
                              QTextEdit, QProgressBar,
-                             QFileDialog, QMessageBox)
+                             QFileDialog, QMessageBox,
+                             QComboBox)
 from PyQt6.QtGui import QIcon, QAction
 
 
 class MainWindow(QMainWindow):
     dir_path = ""
+    file_type = ""
     file_names = []
     step = 0
 
@@ -42,49 +44,106 @@ class MainWindow(QMainWindow):
         self.verticalLayout = QVBoxLayout(self.verticalLayoutWidget)
         self.verticalLayout.setContentsMargins(0, 0, 0, 10)
         self.verticalLayout.setObjectName("verticalLayout")
-        # 1 垂直レイアウトウィジェットの1行目の要素
+        # 1 垂直レイアウトウィジェットの1行目の要素（横レイアウトに3要素配置）
+        self.horizontalLayout_6 = QHBoxLayout()
+        self.horizontalLayout_6.setObjectName("horizontalLayout_6")
+        # 1-1 垂直レイアウトウィジェットの1行目の要素（横レイアウトの1要素目）
+        self.label_fileType = QLabel(parent=self.verticalLayoutWidget)
+        self.label_fileType.setObjectName("label_fileType")
+        self.label_fileType.setText("対象ファイルの拡張子")
+        self.horizontalLayout_6.addWidget(self.label_fileType)
+        # 1-2 垂直レイアウトウィジェットの1行目の要素（横レイアウトの2要素目）
+        self.comboBox_fileType = QComboBox(parent=self.verticalLayoutWidget)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.comboBox_fileType.sizePolicy().hasHeightForWidth())
+        self.comboBox_fileType.setSizePolicy(sizePolicy)
+        self.comboBox_fileType.setObjectName("comboBox_fileType")
+        self.comboBox_fileType.addItems(["選択してください", "pdf", "jpg", "png", "txt", "csv", "zip", "docx", "xlsx", "pptx", "その他"])
+        self.horizontalLayout_6.addWidget(self.comboBox_fileType)
+        self.comboBox_fileType.setCurrentIndex(0)
+        self.comboBox_fileType.currentTextChanged.connect(self.fileType_changed) # コンボボックスの値が変更されたときのイベント
+
+        # 1-2-1 垂直レイアウトウィジェットの1行目の要素（横レイアウトの2要素目の補足テキスト）
+        self.lineEdit_3 = QLineEdit(parent=self.verticalLayoutWidget)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.lineEdit_3.sizePolicy().hasHeightForWidth())
+        self.lineEdit_3.setSizePolicy(sizePolicy)
+        self.lineEdit_3.setObjectName("lineEdit_3")
+        self.lineEdit_3.setText("その他の場合は直接入力")
+        self.horizontalLayout_6.addWidget(self.lineEdit_3)
+        self.lineEdit_3.setEnabled(False)
+
+        # 1-3 垂直レイアウトウィジェットの1行目の要素（横レイアウトの3要素目）
+        self.label_sort = QLabel(parent=self.verticalLayoutWidget)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_sort.sizePolicy().hasHeightForWidth())
+        self.label_sort.setSizePolicy(sizePolicy)
+        self.label_sort.setObjectName("label_sort")
+        self.label_sort.setText("　　ファイルの並び順")
+        self.horizontalLayout_6.addWidget(self.label_sort)
+        # 1-4 垂直レイアウトウィジェットの1行目の要素（横レイアウトの4要素目）
+        self.comboBox_sortFile = QComboBox(parent=self.verticalLayoutWidget)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.comboBox_sortFile.sizePolicy().hasHeightForWidth())
+        self.comboBox_sortFile.setSizePolicy(sizePolicy)
+        self.comboBox_sortFile.setObjectName("comboBox_sortFile")
+        self.comboBox_sortFile.addItems(["名前順", "更新日時順", "作成日時順", "サイズ順"])
+        self.horizontalLayout_6.addWidget(self.comboBox_sortFile)
+        # 1-5 垂直レイアウトウィジェットの1行目の要素（横レイアウトの5要素目）
+        spacerItem = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.horizontalLayout_6.addItem(spacerItem)
+        self.verticalLayout.addLayout(self.horizontalLayout_6)
+        # 2 垂直レイアウトウィジェットの2行目の要素
         self.label_path = QLabel(parent=self.verticalLayoutWidget)
         self.label_path.setObjectName("label_path")
         self.label_path.setText("参照パス")
         self.verticalLayout.addWidget(self.label_path)
-        # 2 垂直レイアウトウィジェットの2行目の要素（横レイアウトに2要素配置）
+        # 3 垂直レイアウトウィジェットの3行目の要素（横レイアウトに2要素配置）
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
-        # 2-1 垂直レイアウトウィジェットの2行目の要素（横レイアウトの1要素目）
+        # 3-1 垂直レイアウトウィジェットの3行目の要素（横レイアウトの1要素目）
         self.lineEdit_path = QLineEdit(parent=self.verticalLayoutWidget)
         self.lineEdit_path.setObjectName("lineEdit_path")
         self.horizontalLayout_2.addWidget(self.lineEdit_path)
-        # 2-2 垂直レイアウトウィジェットの2行目の要素（横レイアウトの2要素目）
+        # 3-2 垂直レイアウトウィジェットの3行目の要素（横レイアウトの2要素目）
         self.pushButton_select_path = QPushButton(parent=self.verticalLayoutWidget)
         self.pushButton_select_path.setObjectName("pushButton_select_path")
         self.pushButton_select_path.setText("参照...")
         self.pushButton_select_path.clicked.connect(self.open_folder_dialog)
         self.horizontalLayout_2.addWidget(self.pushButton_select_path)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
-        # 3 垂直レイアウトウィジェットの3行目の要素
+        # 4 垂直レイアウトウィジェットの4行目の要素
         self.label_log = QLabel(parent=self.verticalLayoutWidget)
         self.label_log.setObjectName("label_log")
         self.label_log.setText("情報")
         self.verticalLayout.addWidget(self.label_log)
-        # 4 垂直レイアウトウィジェットの4行目の要素
+        # 5 垂直レイアウトウィジェットの5行目の要素
         self.textEdit_log = QTextEdit(parent=self.verticalLayoutWidget)
         self.textEdit_log.setObjectName("textEdit_log")
         self.verticalLayout.addWidget(self.textEdit_log)
-        # 5 垂直レイアウトウィジェットの5行目の要素
+        # 6 垂直レイアウトウィジェットの6行目の要素
         self.line = QFrame(parent=self.verticalLayoutWidget)
         self.line.setFrameShape(QFrame.Shape.HLine)
         self.line.setFrameShadow(QFrame.Shadow.Sunken)
         self.line.setObjectName("line")
         self.verticalLayout.addWidget(self.line)
-        # 6 垂直レイアウトウィジェットの6行目の要素（横レイアウトに4要素配置）
+        # 7 垂直レイアウトウィジェットの7行目の要素（横レイアウトに4要素配置）
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
-        # 6-1 垂直レイアウトウィジェットの6行目の要素（横レイアウトの1要素目）
+        # 7-1 垂直レイアウトウィジェットの7行目の要素（横レイアウトの1要素目）
         self.checkBox_removeHeaderCharactor = QCheckBox(parent=self.verticalLayoutWidget)
         self.checkBox_removeHeaderCharactor.setObjectName("checkBox_removeHeaderCharactor")
         self.checkBox_removeHeaderCharactor.setText("先頭の")
         self.horizontalLayout.addWidget(self.checkBox_removeHeaderCharactor)
-        # 6-2 垂直レイアウトウィジェットの6行目の要素（横レイアウトの2要素目）
+        # 7-2 垂直レイアウトウィジェットの7行目の要素（横レイアウトの2要素目）
         self.lineEdit_removeNumber = QLineEdit(parent=self.verticalLayoutWidget)
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -94,30 +153,30 @@ class MainWindow(QMainWindow):
         self.lineEdit_removeNumber.setObjectName("lineEdit_removeNumber")
         self.lineEdit_removeNumber.setText("3")
         self.horizontalLayout.addWidget(self.lineEdit_removeNumber)
-        # 6-3 垂直レイアウトウィジェットの6行目の要素（横レイアウトの3要素目）
+        # 7-3 垂直レイアウトウィジェットの7行目の要素（横レイアウトの3要素目）
         self.label_2 = QLabel(parent=self.verticalLayoutWidget)
         self.label_2.setObjectName("label_2")
         self.label_2.setText("文字を取り除く。")
         self.horizontalLayout.addWidget(self.label_2)
-        # 6-4 垂直レイアウトウィジェットの6行目の要素（横レイアウトの4要素目）
+        # 7-4 垂直レイアウトウィジェットの7行目の要素（横レイアウトの4要素目）
         spacerItem = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.verticalLayout.addLayout(self.horizontalLayout)
-        # 7 垂直レイアウトウィジェットの7行目の要素
+        # 8 垂直レイアウトウィジェットの8行目の要素
         self.line_2 = QFrame(parent=self.verticalLayoutWidget)
         self.line_2.setFrameShape(QFrame.Shape.HLine)
         self.line_2.setFrameShadow(QFrame.Shadow.Sunken)
         self.line_2.setObjectName("line_2")
         self.verticalLayout.addWidget(self.line_2)
-        # 8 垂直レイアウトウィジェットの8行目の要素（横レイアウトに4要素配置）
+        # 9 垂直レイアウトウィジェットの9行目の要素（横レイアウトに4要素配置）
         self.horizontalLayout_4 = QHBoxLayout()
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
-        # 8-1 垂直レイアウトウィジェットの8行目の要素（横レイアウトの1要素目）
+        # 9-1 垂直レイアウトウィジェットの9行目の要素（横レイアウトの1要素目）
         self.checkBox_addPrefix = QCheckBox(parent=self.verticalLayoutWidget)
         self.checkBox_addPrefix.setObjectName("checkBox_addPrefix")
         self.checkBox_addPrefix.setText("ファイル名の先頭に")
         self.horizontalLayout_4.addWidget(self.checkBox_addPrefix)
-        # 8-2 垂直レイアウトウィジェットの8行目の要素（横レイアウトの2要素目）
+        # 9-2 垂直レイアウトウィジェットの9行目の要素（横レイアウトの2要素目）
         self.lineEdit_addPrefix = QLineEdit(parent=self.verticalLayoutWidget)
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -127,34 +186,34 @@ class MainWindow(QMainWindow):
         self.lineEdit_addPrefix.setObjectName("lineEdit_addPrefix")
         self.lineEdit_addPrefix.setText("4")
         self.horizontalLayout_4.addWidget(self.lineEdit_addPrefix)
-        # 8-3 垂直レイアウトウィジェットの8行目の要素（横レイアウトの3要素目）
+        # 9-3 垂直レイアウトウィジェットの9行目の要素（横レイアウトの3要素目）
         self.label_addPrefix = QLabel(parent=self.verticalLayoutWidget)
         self.label_addPrefix.setObjectName("label_addPrefix")
         self.label_addPrefix.setText("桁の連番を追加する。")
         self.horizontalLayout_4.addWidget(self.label_addPrefix)       
-        # 8-4 垂直レイアウトウィジェットの8行目の要素（横レイアウトの4要素目）
+        # 9-4 垂直レイアウトウィジェットの9行目の要素（横レイアウトの4要素目）
         spacerItem1 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         self.horizontalLayout_4.addItem(spacerItem1)
         self.verticalLayout.addLayout(self.horizontalLayout_4)
-        # 9 垂直レイアウトウィジェットの9行目の要素
-        self.line_2 = QFrame(parent=self.verticalLayoutWidget)
-        self.line_2.setFrameShape(QFrame.Shape.HLine)
-        self.line_2.setFrameShadow(QFrame.Shadow.Sunken)
-        self.line_2.setObjectName("line_2")
-        self.verticalLayout.addWidget(self.line_2)
-        # 10 垂直レイアウトウィジェットの10行目の要素（横レイアウトに3要素配置）
+        # 10 垂直レイアウトウィジェットの10行目の要素
+        self.line_3 = QFrame(parent=self.verticalLayoutWidget)
+        self.line_3.setFrameShape(QFrame.Shape.HLine)
+        self.line_3.setFrameShadow(QFrame.Shadow.Sunken)
+        self.line_3.setObjectName("line_3")
+        self.verticalLayout.addWidget(self.line_3)
+        # 11 垂直レイアウトウィジェットの11行目の要素（横レイアウトに3要素配置）
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
-        # 10-1 垂直レイアウトウィジェットの10行目の要素（横レイアウトの1要素目）
+        # 11-1 垂直レイアウトウィジェットの11行目の要素（横レイアウトの1要素目）
         spacerItem = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         self.horizontalLayout_3.addItem(spacerItem)
-        # 10-2 垂直レイアウトウィジェットの10行目の要素（横レイアウトの2要素目）
+        # 11-2 垂直レイアウトウィジェットの11行目の要素（横レイアウトの2要素目）
         self.btn_run = QPushButton(parent=self.verticalLayoutWidget)
         self.btn_run.setObjectName("btn_run")
         self.btn_run.setText("実行")
         self.btn_run.clicked.connect(self.edit_prefix)
         self.horizontalLayout_3.addWidget(self.btn_run)
-        # 10-3 垂直レイアウトウィジェットの10行目の要素（横レイアウトの3要素目）
+        # 11-3 垂直レイアウトウィジェットの11行目の要素（横レイアウトの3要素目）
         self.btn_quit = QPushButton(parent=self.verticalLayoutWidget)
         self.btn_quit.setObjectName("btn_quit")
         self.btn_quit.setText("終了")
@@ -175,14 +234,57 @@ class MainWindow(QMainWindow):
         self.show()
     
     def open_folder_dialog(self):
+        self.textEdit_log.clear()
+        if not self.comboBox_fileType.currentText() or self.comboBox_fileType.currentText() == "選択してください":
+            QMessageBox.warning(self, "警告", "対象ファイルの拡張子を選択してください。")
+            return
+        if self.comboBox_fileType.currentText() == "その他":
+            if not self.lineEdit_3.text():
+                QMessageBox.warning(self, "警告", "その他の場合は拡張子を直接入力してください。")
+                return
+            self.file_type = self.lineEdit_3.text().strip().lower()
+        else:
+            self.file_type = self.comboBox_fileType.currentText().strip().lower()
+        
+        if not self.comboBox_sortFile.currentText():
+            QMessageBox.warning(self, "警告", "ファイルの並び順を選択してください。")
+            return
+        self.sort_type = self.comboBox_sortFile.currentText()
+        
+
+
+
+        # フォルダ選択ダイアログを開く
         folder = QFileDialog.getExistingDirectory(self, "フォルダを選択")
         if folder:
             self.lineEdit_path.setText(folder)
             self.dir_path = folder
             self.file_names = get_file_names(folder)
-            if self.file_names:
-                for file in self.file_names:
-                    self.textEdit_log.append(file)
+            self.textEdit_log.append(f"選択されたフォルダ: {self.dir_path}")
+        self.textEdit_log.append(f"----------------------------------------")
+        if not self.file_names:
+            self.textEdit_log.append(f"フォルダ内に{self.file_type}ファイルがありません。")
+            return
+        else:
+            # 指定された拡張子のファイルのみをフィルタリング
+            self.file_names = [f for f in self.file_names if f.lower().endswith(f".{self.file_type}")]
+            if not self.file_names:
+                self.textEdit_log.append(f"フォルダ内に{self.file_type}ファイルがありません。")
+                return
+            self.textEdit_log.append(f"フォルダ内に{len(self.file_names)}個の{self.file_type}ファイルが見つかりました。")
+            # ファイルの並び替え
+            if self.sort_type == "名前順":
+                self.file_names.sort()
+            elif self.sort_type == "更新日時順":
+                self.file_names.sort(key=lambda x: os.path.getmtime(os.path.join(self.dir_path, x)))
+            elif self.sort_type == "作成日時順":
+                self.file_names.sort(key=lambda x: os.path.getctime(os.path.join(self.dir_path, x)))
+            elif self.sort_type == "サイズ順":
+                self.file_names.sort(key=lambda x: os.path.getsize(os.path.join(self.dir_path, x)))
+            for file in self.file_names:
+                self.textEdit_log.append(file)
+            self.textEdit_log.append(f"----------------------------------------")
+        
     
     def edit_prefix(self):
         if not self.dir_path:
@@ -241,7 +343,14 @@ class MainWindow(QMainWindow):
             self.lineEdit_removeNumber.setText("3")
             self.lineEdit_addPrefix.setText("4")
             self.step = 0
-
+    
+    def fileType_changed(self, text):
+        if text == "その他":
+            self.lineEdit_3.setEnabled(True)
+            self.lineEdit_3.setText("")
+        else:
+            self.lineEdit_3.setEnabled(False)
+            self.lineEdit_3.setText("その他の場合は直接入力")
 
 
 def get_file_names(directory):
