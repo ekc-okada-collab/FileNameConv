@@ -1,2 +1,9 @@
 data/PDF_Files/*.pdf
 data/PDF_Files/output/*.pdf
+*.DS_Store
+__pycache__/
+*.pyc
+.vscode/
+.env
+.idea/
+*.ui
